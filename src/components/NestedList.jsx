@@ -70,7 +70,7 @@ function NestedList(props) {
     return (
         <>
             {buttonExpand}
-            {allExpanded}-{expanded}
+            {/* {allExpanded}-{expanded} */}
             <br/>
             {nestedList}
         </>

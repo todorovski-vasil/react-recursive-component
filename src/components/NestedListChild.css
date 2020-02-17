@@ -2,6 +2,10 @@
     margin-left: 1rem;
 }
 
+.marginLabel {
+    margin-left: 0.5rem;
+}
+
 .marginButton {
     margin-left: 0.5rem;
 }

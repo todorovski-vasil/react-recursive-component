@@ -1,3 +1,14 @@
+This application contains a component that can display a nested json data with the following structure of each node:
+    - id: any
+    - text: string
+    - children: array of nodes with the same structure
+
+The component is comprised of a main component called NestedList, which receives the json data, and a recursive component called NestedListChild.
+
+The main component contains the button which changes its functionality according to the summed expanded status of the children components: Expand all if some nodes are colapsed, colapse all if all nodes are expanded.
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

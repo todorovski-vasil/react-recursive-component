@@ -87,7 +87,8 @@ function NestedListChild(props) {
     return (
         <>
             <div>
-                {button}{props.data.text}{"---"}{expandedChildren}
+                {button}<span className="marginLabel">{props.data.text}</span>
+                {/* {"---"}{expandedChildren} */}
             </div>
             <br/>
             <div className="marginNested">
