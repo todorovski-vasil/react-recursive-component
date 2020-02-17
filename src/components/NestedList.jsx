@@ -13,20 +13,25 @@ function NestedList(props) {
     const [allExpanded, setAllExpanded] = useState('all');
 
     const [buttonExpand, setButtonExpand] = useState(<button>Colapse all</button>);
-    // let forceExpand = 'all';
-    useEffect(props => {
+    useEffect(() => {
         switch(allExpanded){
             case 'all':
-                setButtonExpand(<button onClick={() => setAllExpanded('none')}>Colapse all</button>);
+                setButtonExpand(<button onClick={() => {
+                    setAllExpanded('none');
+                    setExpanded(dataChildren.map(subData => 'none'));
+                }}>Colapse all</button>);
                 break;
             case 'none':
                 setButtonExpand(<button disabled>Expand all</button>);
                 break;
             case 'some':
-                setButtonExpand(<button onClick={() => setAllExpanded('all')}>Expand all</button>);
+                setButtonExpand(<button onClick={() => {
+                    setAllExpanded('all');
+                    setExpanded(dataChildren.map(subData => 'all'))
+                }}>Expand all</button>);
                 break;
         }
-    }, [allExpanded]);
+    }, [expanded, allExpanded]);
 
     let nestedList = null;
     nestedList = dataChildren.map(subData => {
@@ -34,7 +39,7 @@ function NestedList(props) {
         return <NestedListChild key={subData.id} data={subData} forceExpand={allExpanded} setExpanded={(childId, expandedChildren) => {
             let expandedChildrenState = [...expanded];
             let exState = dataChildren.reduce((acc, child, childIndex) => {
-                if(child.id === childId) {                
+                if(child.id === childId) {
                     expandedChildrenState[childIndex] = expandedChildren;                
                 }
                 if(expandedChildrenState[childIndex] !== acc.sum) {
