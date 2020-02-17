@@ -16,7 +16,7 @@ function NestedListChild(props) {
         if(expanded) {
             children = props.data.children.map(childData => {
                 childData.children = childData.children ? childData.children : [];
-                return <NestedListChild key={childData.id} data={childData} setExpanded={(childId, expandedChild) => {
+                return <NestedListChild key={childData.id} data={childData} forceExpand={props.forceExpand} setExpanded={(childId, expandedChild) => {
                     let expandedChildrenState = [...expandedChildren];
                     let exState = props.data.children.reduce((acc, child, childIndex) => {
                         if(child.id === childId) {
@@ -64,6 +64,23 @@ function NestedListChild(props) {
     useEffect(() => {
         props.setExpanded(props.data.id, parentExp);
     }, [parentExp]);
+
+    useEffect(() => {
+        switch(props.forceExpand) {
+            case 'all':
+                setExp(true);
+                setExpChildren(expandedChildren.map(() => 'all'));
+                setParentExp('all');
+                break;
+            case 'none':
+                setExp(false);
+                setExpChildren(expandedChildren.map(() => 'none'));
+                setParentExp('none');
+                break;
+            case 'some':
+                break;
+        }
+    }, [props.forceExpand]);
 
     return (
         <>

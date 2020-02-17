@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import NestedListChild from './NestedListChild';
 
-function NestedListHead(props) {
-
-    let nestedList = null;
+function NestedList(props) {
     let dataChildren = [];
     if(Array.isArray(props.data)) {
         dataChildren = props.data;
@@ -12,15 +10,28 @@ function NestedListHead(props) {
     }
 
     const [expanded, setExpanded] = useState(dataChildren.map(subData => 'all')); // 'some', 'none'
-    const [allExpanded, setAllExpanded] = useState('all'); 
+    const [allExpanded, setAllExpanded] = useState('all');
 
-    function forceExpanded() {
-        
-    }
+    const [buttonExpand, setButtonExpand] = useState(<button>Colapse all</button>);
+    // let forceExpand = 'all';
+    useEffect(props => {
+        switch(allExpanded){
+            case 'all':
+                setButtonExpand(<button onClick={() => setAllExpanded('none')}>Colapse all</button>);
+                break;
+            case 'none':
+                setButtonExpand(<button disabled>Expand all</button>);
+                break;
+            case 'some':
+                setButtonExpand(<button onClick={() => setAllExpanded('all')}>Expand all</button>);
+                break;
+        }
+    }, [allExpanded]);
 
+    let nestedList = null;
     nestedList = dataChildren.map(subData => {
         subData.children = subData.children ? subData.children : [];
-        return <NestedListChild key={subData.id} data={subData} forceExpanded={forceExpanded} setExpanded={(childId, expandedChildren) => {
+        return <NestedListChild key={subData.id} data={subData} forceExpand={allExpanded} setExpanded={(childId, expandedChildren) => {
             let expandedChildrenState = [...expanded];
             let exState = dataChildren.reduce((acc, child, childIndex) => {
                 if(child.id === childId) {                
@@ -49,10 +60,11 @@ function NestedListHead(props) {
             setExpanded(expandedChildrenState);
             setAllExpanded(exState.sum);
         }}/>
-    });
+    });    
 
     return (
         <>
+            {buttonExpand}
             {allExpanded}-{expanded}
             <br/>
             {nestedList}
@@ -60,4 +72,4 @@ function NestedListHead(props) {
     );
 }
 
-export default NestedListHead;
+export default NestedList;
