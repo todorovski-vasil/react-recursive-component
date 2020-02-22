@@ -2,26 +2,20 @@ import React, { useState, useEffect } from 'react';
 import NestedListChild from './NestedListChild';
 
 function NestedList(props) {
-    let dataChildren = [];  // obsolete, to be replaced by data
     let data = [];
     if(Array.isArray(props.data)) {
-        // dataChildren = props.data;
         data = {
             id: null,
             children: [...props.data]
         }
-    } else {    
-        // dataChildren = props.data.children ? props.data.children : [];
+    } else {
         data = {...props.data};
         data.children = Array.isArray(props.data.children) ? [...props.data.children] : [];
     }
 
-    // const [expanded, setExpanded] = useState(dataChildren.map(() => 'all')); // 'some', 'none'
     // keep the expanded state of the children nodes
-    // const [expanded, setExpanded] = useState(data.children.map(() => 'none')); // 'all', 'some', 'none'
     const [childrenExpanded, setChildrenExpanded] = useState(data.children.map(() => 'none')); // 'all', 'some', 'none'
     // keep the summed up expanded state of this node
-    // const [allExpanded, setAllExpanded] = useState('all');  // obsolete, to be replaced by summedExpanded
     const [summedExpanded, setSummedExpanded] = useState('none');
     const [forceExpand, setForceExpand] = useState('some');
 
@@ -50,10 +44,23 @@ function NestedList(props) {
     }
 
     const reportExpanded = (id, newStatus) => {
-        const nextExpanded = data.children.map((child, index) => child.id === id ? newStatus : childrenExpanded[index]);
+        const nextExpanded = data.children.map((child, index) => {
+            if(child.id === id) {
+                return newStatus;
+            } else if(childrenExpanded[index]) {
+                return childrenExpanded[index];
+            } else {
+                return forceExpand;
+            }
+        });
         setChildrenExpanded(nextExpanded);
-        setSummedExpanded(getSummedExpandedStatus(nextExpanded));
-        setForceExpand('some');
+        const nextSummedExpanded = getSummedExpandedStatus(nextExpanded);
+        if(nextSummedExpanded !== summedExpanded) {
+            setSummedExpanded(nextSummedExpanded);
+        }
+        if(forceExpand !== 'some') {
+            setForceExpand('some');
+        }
     }
 
     let buttonExpand = null;
@@ -61,7 +68,8 @@ function NestedList(props) {
         case 'all':
             buttonExpand = <button onClick={() => {
                 setForceExpand('none');
-                setChildrenExpanded(dataChildren.map(subData => 'none'));
+                setChildrenExpanded(data.children.map(subData => 'none'));
+                setSummedExpanded('none');
             }}>Colapse all</button>;
             break;
         case 'none':
@@ -70,14 +78,17 @@ function NestedList(props) {
         case 'some':
             buttonExpand = <button onClick={() => {
                 setForceExpand('all');
-                setChildrenExpanded(dataChildren.map(subData => 'all'))
+                setChildrenExpanded(data.children.map(subData => 'all'));
+                setSummedExpanded('all');
             }}>Expand all</button>;
             break;
     }
 
     let nestedList = null;
     nestedList = data.children.map(subData => {
-        subData.children = subData.children ? subData.children : [];
+        if(!subData.children) {
+            subData.children = [];
+        }
         return (
             <NestedListChild
                 key={subData.id} 
@@ -92,7 +103,7 @@ function NestedList(props) {
     return (
         <>
             {buttonExpand}
-            {summedExpanded} - [{childrenExpanded.map(e => e + ' ')}] {/* for debugging only */}
+            {/* {summedExpanded} - [{childrenExpanded.map(e => e + ' ')}] */}
             <br/>
             {nestedList}
         </>

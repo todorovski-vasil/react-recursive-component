@@ -12,14 +12,65 @@ function NestedListChild(props) {
     const reportExpanded = (id, newStatus) => {
         const nextExpanded = props.data.children.map((child, index) => child.id === id ? newStatus : childrenExpanded[index]);
         setChildrenExpanded(nextExpanded);
-        setSummedExpanded(nodeExpanded ? props.getSummedExpandedStatus(nextExpanded) : 'none');
+        const nextSummedExpanded = nodeExpanded ? props.getSummedExpandedStatus(nextExpanded) : 'none';
+        if(nextSummedExpanded !== summedExpanded) {
+            setSummedExpanded(nextSummedExpanded);
+        }        
+    }
+
+    useEffect(() => {
+        if(props.forceExpand !== 'all') {
+            props.reportExpanded(props.data.id, hasChildren(props.data) ? 'none' : 'all');
+        } else {
+            props.reportExpanded(props.data.id, 'all');
+        }
+        return () => props.reportExpanded(props.data.id, 'none')
+    }, []);
+
+    useEffect(() => {
+        if(props.forceExpand !== 'all') {
+            props.reportExpanded(props.data.id, summedExpanded);
+        }
+    }, [summedExpanded]);
+
+    useEffect(() => {
+        switch(props.forceExpand) {
+            case 'all':
+                setNodeExpanded(true);
+                setChildrenExpanded(childrenExpanded.map(() => 'all'));
+                setSummedExpanded('all');
+                props.reportExpanded(props.data.id, 'all');
+                break;
+            case 'none':
+                setNodeExpanded(false);
+                setChildrenExpanded(childrenExpanded.map(() => 'none'));
+                setSummedExpanded('none');
+                props.reportExpanded(props.data.id, 'none');
+                break;
+            case 'some':
+                break;
+        }
+    }, [props.forceExpand]);
+
+    const onButtonExpand = () => {
+        setNodeExpanded(true);
+        let nextExpanded = ['all'];
+        if(Array.isArray(props.data.children)) {
+            nextExpanded = props.data.children.map(child => {
+                return (child.children && Array.isArray(child.children) && child.children.length) ? 'none' : 'all';
+            });
+        }
+        setChildrenExpanded(nextExpanded);
+        const nextSummedExpanded = props.getSummedExpandedStatus(nextExpanded);
+        if(nextSummedExpanded !== summedExpanded){
+            setSummedExpanded(nextSummedExpanded);
+        }
     }
 
     let children = null;
     let button = null;
-
     if(props.data.children.length !== 0) {
-        if(nodeExpanded) {
+        if(props.forceExpand === 'all' || (nodeExpanded && props.forceExpand !== 'none')) {
             children = props.data.children.map(childData => {
                 childData.children = childData.children ? childData.children : [];
                 return <NestedListChild
@@ -32,56 +83,19 @@ function NestedListChild(props) {
 
             button = <button className="marginButton" onClick={() => {
                 setNodeExpanded(false);
-                // setChildrenExpanded(childrenExpanded.map(() => 'none'));
                 setSummedExpanded('none');
             }}>-</button>;
         } else {
-            button = <button className="marginButton" onClick={() => {
-                setNodeExpanded(true);
-                // setChildrenExpanded(childrenExpanded.map(() => 'none'));
-                let nextExpanded = ['all'];
-                if(Array.isArray(props.data.children)) {
-                    nextExpanded = props.data.children.map(child => {
-                        return (child.children && Array.isArray(child.children) && child.children.length) ? 'none' : 'all';
-                    });
-                }
-                setChildrenExpanded(nextExpanded);
-                // setSummedExpanded('none');
-                setSummedExpanded(props.getSummedExpandedStatus(nextExpanded));
-            }}>+</button>;
+            button = <button className="marginButton" onClick={onButtonExpand}>+</button>;
         }
     }
-
-    useEffect(() => {
-        props.reportExpanded(props.data.id, hasChildren(props.data) ? 'none' : 'all');
-    }, []);
-
-    useEffect(() => {
-        props.reportExpanded(props.data.id, summedExpanded);
-    }, [summedExpanded]);
-
-    useEffect(() => {
-        switch(props.forceExpand) {
-            case 'all':
-                setNodeExpanded(true);
-                setChildrenExpanded(childrenExpanded.map(() => 'all'));
-                setSummedExpanded('all');
-                break;
-            case 'none':
-                setNodeExpanded(false);
-                setChildrenExpanded(childrenExpanded.map(() => 'none'));
-                setSummedExpanded('none');
-                break;
-            case 'some':
-                break;
-        }
-    }, [props.forceExpand]);
 
     return (
         <>
             <div>
                 {button}<span className="marginLabel">{props.data.text}</span>
-                {"---"}{childrenExpanded}
+                {/* {" " + summedExpanded} */}
+                {/* {"---"}{childrenExpanded} */}
             </div>
             <br/>
             <div className="marginNested">
