@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import NestedListChild from './NestedListChild';
 
 function NestedList(props) {
@@ -19,7 +19,7 @@ function NestedList(props) {
     const [summedExpanded, setSummedExpanded] = useState('none');
     const [forceExpand, setForceExpand] = useState('some');
 
-    const getSummedExpandedStatus = (status) => {
+    const getSummedExpandedStatus = useCallback((status) => {
         return data.children.reduce((acc, child, childIndex) => {
             if(status[childIndex] !== acc.sum) {
                 if(status[childIndex] === 'none') {
@@ -41,9 +41,9 @@ function NestedList(props) {
             } 
             return acc;
         }, { sum: 'all', some: false }).sum;
-    }
+    }, [data.children]);
 
-    const reportExpanded = (id, newStatus) => {
+    const reportExpanded = useCallback((id, newStatus) => {
         const nextExpanded = data.children.map((child, index) => {
             if(child.id === id) {
                 return newStatus;
@@ -61,7 +61,7 @@ function NestedList(props) {
         if(forceExpand !== 'some') {
             setForceExpand('some');
         }
-    }
+    }, [data.children, childrenExpanded, summedExpanded, forceExpand, getSummedExpandedStatus]);
 
     let buttonExpand = null;
     switch(summedExpanded){
@@ -82,6 +82,8 @@ function NestedList(props) {
                 setSummedExpanded('all');
             }}>Expand all</button>;
             break;
+        default:
+            throw new Error('summedExpanded has an invalid state: ' + summedExpanded);
     }
 
     let nestedList = null;
