@@ -43,6 +43,7 @@ function NestedList(props) {
         }, { sum: 'all', some: false }).sum;
     }, [data.children]);
 
+    // callback to be used by the child components to report their summedExpanded state to this component
     const reportExpanded = useCallback((id, newStatus) => {
         const nextExpanded = data.children.map((child, index) => {
             if(child.id === id) {
@@ -58,6 +59,8 @@ function NestedList(props) {
         if(nextSummedExpanded !== summedExpanded) {
             setSummedExpanded(nextSummedExpanded);
         }
+        // always reset forceExpand to 'some' after receiving change from a child componenet
+        // (this enables the forceExpand prop to act as a sygnal when set to 'all' or 'none', an be ignored right away afterwards)
         if(forceExpand !== 'some') {
             setForceExpand('some');
         }

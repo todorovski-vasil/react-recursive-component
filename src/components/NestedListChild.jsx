@@ -43,21 +43,16 @@ const calculateSummedExpandedStatus = (data, status) => {
     }, { sum: 'all', some: false }).sum;
 }
 
-// const NestedListChild = React.memo(props => {
 const NestedListChild = props => {
     const [nodeExpanded, setNodeExpanded] = useState(props.forceExpand === 'all' ? true : false);
     const [childrenExpanded, setChildrenExpanded] = useState(initChildrenExpanded(props.data)); // 'all', 'some', 'none'
     const [summedExpanded, setSummedExpanded] = useState(initSummedExpanded(props.data, props.forceExpand));
    
-    // const stateAndPropsToString = () => {
-    //     return "props: { text: " + props.data.text + ", force: " + props.forceExpand + " }, "
-    //         + " nodeExpanded: " + nodeExpanded + ", childrenExpanded: [" + childrenExpanded.join(", ") + "], summedExpanded: " + summedExpanded;
-    // }    
-
     const getSummedExpandedStatus = useCallback((status) => {
         return calculateSummedExpandedStatus(props.data, status);
     }, [props.data]);
 
+    // callback to be used by the child components to report their summedExpanded state to this component
     const reportExpanded = useCallback((id, newStatus) => {
         const nextExpanded = props.data.children.map((child, index) => child.id === id ? newStatus : childrenExpanded[index]);
         setChildrenExpanded(nextExpanded);
@@ -68,6 +63,7 @@ const NestedListChild = props => {
         } 
     }, [props.data, nodeExpanded, childrenExpanded, summedExpanded]);
 
+    // on change to the summedExpanded state, report the new state to the parent component
     useEffect(() => {
         props.reportExpanded(props.data.id, summedExpanded);
     }, [props.data.id, summedExpanded]);  // eslint-disable-line react-hooks/exhaustive-deps
@@ -135,8 +131,6 @@ const NestedListChild = props => {
         <>
             <div>
                 {button}<span className="marginLabel">{props.data.text}</span>
-                {/* {" " + summedExpanded} */}
-                {/* {"---"}{childrenExpanded} */}
             </div>
             <br/>
             <div className="marginNested">
@@ -145,6 +139,5 @@ const NestedListChild = props => {
         </>
     );
 }
-// }, (prevProps, nextProps) => prevProps.forceExpand === nextProps.forceExpand);
 
 export default NestedListChild;
